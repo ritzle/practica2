@@ -1,25 +1,44 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
 #include <tuple>
+#include <string>
 
 using namespace std;
 
 bool theoremFerma(int number, int degree, int mod);
 unsigned long long logPowMod(int number, int degree, int mod);
-int algEuclid(int number_1, int number_2);
-tuple<int, int, int> extendedAlgEuclid(int a, int b); // вернет НОД x y
+int coprimeTest(int number_1, int number_2); // проверяет взаимно простые ли числа
+int extendedAlgEuclid(int a, int b);         // c^-1 modm = d;
 
 unsigned long int fastPowMod(int number, int degree, int mod);
+
+vector<unsigned long int> encrypt(const string &text, unsigned long int key, int mod);
+string decrypt(const vector<unsigned long int> cipherText, unsigned long int key, int mod);
 
 void printVector(const vector<int> &vec);
 bool checkPrimeNumber(int &number);
 void toBinary(int degree, vector<int> &binaryNum);
+void CipherHughes();
+
+unsigned long int modInverse(unsigned long int a, int m)
+{
+    a = a % m;
+    for (int x = 1; x < m; x++)
+    {
+        if ((a * x) % m == 1)
+        {
+            return x;
+        }
+    }
+    return 1; // Возвращаем 1, если обратное число не найдено
+}
 
 int main()
 {
-    cout << logPowMod(3, 100, 7) << " - " << fastPowMod(3, 100, 7);
+    CipherHughes();
 }
 
 bool theoremFerma(int number, int degree, int mod)
@@ -56,7 +75,7 @@ unsigned long long logPowMod(int number, int degree, int mod)
     return result;
 }
 
-int algEuclid(int number_1, int number_2)
+int coprimeTest(int number_1, int number_2)
 {
     while (number_1 != 0 && number_2 != 0)
     {
@@ -73,9 +92,14 @@ int algEuclid(int number_1, int number_2)
     return number_1 + number_2;
 }
 
-tuple<int, int, int> extendedAlgEuclid(int a, int b)
+int extendedAlgEuclid(int c, int m)
 {
 
+    // cz modm = 1 или m(-k) + cz = d(m,c)
+    // тогда на и не нужно значение 2-го элемента
+
+    int a = c;
+    int b = m;
     vector<vector<int>> table;
 
     // первые две особенные
@@ -114,11 +138,13 @@ tuple<int, int, int> extendedAlgEuclid(int a, int b)
     }
     cout << endl;
 
-    return make_tuple(table[table.size() - 2][0], x, y);
+    vector<int> inverse = table[table.size() - 2];
+
+    return inverse[1] + b;
 }
 
 unsigned long int fastPowMod(int number, int degree, int mod) // при mod = 10 найдем остаток
-{                                                             // основан на полове степени
+{                                                             // основан на половине степени
     if (degree == 0)
         return 1;
 
@@ -157,4 +183,87 @@ void toBinary(int degree, vector<int> &binaryNum)
         degree /= 2;                     // и делим число на 2
     }
     reverse(binaryNum.begin(), binaryNum.end()); // после переворачиваем
+}
+
+void CipherHughes()
+{
+    std::ofstream fileAlisa("Alisa.txt", std::ios::trunc); // Открыть файл для записи и очистить его содержимое
+    fileAlisa.close();
+
+    std::ofstream fileBob("Bob.txt", std::ios::trunc); // Открыть файл для записи и очистить его содержимое
+    fileBob.close();
+
+    int base; // основание
+    cout << "enter general base: ";
+    cin >> base;
+
+    int mod; // большое простое число
+    cout << "enter prime number: ";
+    cin >> mod;
+
+    int alisaDegree;
+    cout << "Alisa enter degree: ";
+    cin >> alisaDegree;
+    unsigned long int openAlisaKey = fastPowMod(base, alisaDegree, mod);
+
+    int bobDegree;
+    cout << "Bob enter degree: ";
+    cin >> bobDegree;
+    unsigned long int openBobKey = fastPowMod(base, bobDegree, mod);
+
+    unsigned long int secretAlisaKey = fastPowMod(openBobKey, alisaDegree, mod);
+    unsigned long int secretBobKey = fastPowMod(openAlisaKey, bobDegree, mod);
+
+    cout << secretAlisaKey << " " << secretBobKey;
+    cout << endl;
+
+    cout << "Enter text: ";
+    string text;
+    cin.ignore();
+    getline(std::cin, text);
+
+    vector<unsigned long int> cipherText = encrypt(text, 11, 23);
+    for (auto i : cipherText)
+    {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    string decryptedText = decrypt(cipherText, 11, 23);
+    cout << decryptedText;
+}
+
+// для шифровки
+vector<unsigned long int> encrypt(const string &text, unsigned long int key, int mod)
+{
+
+    vector<unsigned long int> cipherText;
+
+    for (char ch : text)
+    {
+        int chAscii = static_cast<int>(ch); // ASCII
+        unsigned long int val = (chAscii * key) % mod;
+        cipherText.push_back(val);
+    }
+
+    return cipherText;
+}
+
+// для дешифровки
+string decrypt(const vector<unsigned long int> cipherText, unsigned long int key, int mod)
+{
+
+    string decryptedText = "";
+
+    unsigned long int keyInverse = modInverse(key, mod);
+
+    for (unsigned long int val : cipherText)
+    {
+        unsigned long int originalVal = (val * keyInverse) % mod;
+        cout << originalVal << " ";
+        decryptedText += static_cast<char>(originalVal);
+    }
+    cout << endl;
+
+    return decryptedText;
 }
