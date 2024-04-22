@@ -42,6 +42,12 @@ void dataInput(int &base, int &mod, int &alisaDegree, int &bobDegree)
         return;
     }
 
+    if (mod < 211)
+    {
+        cout << "возьмите число больше (223)." << endl;
+        return;
+    }
+
     cout << "Alisa enter degree: ";
     cin >> alisaDegree;
 
@@ -74,7 +80,7 @@ void encryptTheMessage(unsigned long int openAlisaKey, unsigned long int secretA
         // Считываем сообщения построчно из файла
         while (getline(fileMessage, message))
         {
-            vector<int> chiperText = encrypt(message, openAlisaKey, secretAlisaKey, mod);
+            vector<int> chiperText = encrypt(message, secretAlisaKey, mod);
 
             if (fileEncrypted.is_open())
             { // Проверяем, удалось ли открыть файл
@@ -82,7 +88,7 @@ void encryptTheMessage(unsigned long int openAlisaKey, unsigned long int secretA
                 {
                     fileEncrypted << chiperText[i] << " "; // Записываем элементы массива в файл
                 }
-                // fileEncrypted << "\n"; если добавить то в расшифровке лишнии пустые строки будут
+                fileEncrypted << "\n";
                 //  std::cout << "Массив успешно записан в файл." << std::endl;
             }
             else

@@ -57,14 +57,14 @@ void toBinary(int degree, vector<int> &binaryNum)
     reverse(binaryNum.begin(), binaryNum.end()); // после переворачиваем
 }
 
-int extendedAlgEuclid(int c, int m)
+int extendedAlgEuclid(int c, int numberAski)
 {
 
-    // cz mod m = 1 или m(-k) + cz = d(m,c)
+    // cz mod numberAski = 1 или numberAski(-k) + cz = d(numberAski,c)
     // тогда на и не нужно значение 2-го элемента
 
     int a = c;
-    int b = m;
+    int b = numberAski;
     vector<vector<int>> table;
 
     // первые две особенные
@@ -108,55 +108,53 @@ int extendedAlgEuclid(int c, int m)
     return inverse[1] + b;
 }
 
-vector<int> encrypt(const string &plain_text, unsigned long int openAlisaKey, unsigned long int secretAlisaKey, int mod)
+vector<int> encrypt(const string &plain_text, unsigned long int secretAlisaKey, int mod)
 {
-    int c1 = openAlisaKey;
-    vector<int> c2;
 
-    int c3 = secretAlisaKey;
+    vector<int> encryptedCharacters;
+
     for (char ch : plain_text)
     {
-        int m = static_cast<int>(ch); // ASCII
-        int c2_val = (m * c3) % mod;
-        c2.push_back(c2_val);
+        int numberAski = static_cast<int>(ch); // ASCII
+        int c2_val = (numberAski * static_cast<int>(secretAlisaKey)) % mod;
+        encryptedCharacters.push_back(c2_val);
     }
 
-    return c2;
+    return encryptedCharacters;
 }
 
 // для дешифровки
 string decrypt(vector<int> &ciphertext, unsigned long int secretBobKey, int mod)
 {
-    const vector<int> &c2 = ciphertext;
     string decrypted_text = "";
 
     int s_inverse = modInverse(secretBobKey, mod);
 
-    for (int enc_char : c2)
+    for (int enc_char : ciphertext)
     {
-        int m = (enc_char * s_inverse) % mod;
-        decrypted_text.push_back(static_cast<char>(m));
+        int numberAski = (enc_char * s_inverse) % mod;
+        decrypted_text.push_back(static_cast<char>(numberAski));
     }
 
     return decrypted_text;
 }
 
-unsigned long int modInverse(unsigned long int a, int m)
+unsigned long int modInverse(unsigned long int a, int numberAski)
 {
-    int m0 = m;
+    int m0 = numberAski;
     int y = 0, x = 1;
 
-    if (m == 1)
+    if (numberAski == 1)
     {
         return 0;
     }
 
     while (a > 1)
     {
-        int q = a / m;
-        int t = m;
+        int q = a / numberAski;
+        int t = numberAski;
 
-        m = a % m, a = t;
+        numberAski = a % numberAski, a = t;
         t = y;
 
         y = x - q * y;
