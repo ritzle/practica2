@@ -57,14 +57,14 @@ void toBinary(int degree, vector<int> &binaryNum)
     reverse(binaryNum.begin(), binaryNum.end()); // после переворачиваем
 }
 
-int extendedAlgEuclid(int c, int numberAski)
+int extendedAlgEuclid(int c, int m)
 {
 
-    // cz mod numberAski = 1 или numberAski(-k) + cz = d(numberAski,c)
+    // cz modm = 1 или m(-k) + cz = d(m,c)
     // тогда на и не нужно значение 2-го элемента
 
     int a = c;
-    int b = numberAski;
+    int b = m;
     vector<vector<int>> table;
 
     // первые две особенные
